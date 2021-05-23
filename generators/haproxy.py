@@ -11,11 +11,12 @@ def generate(config, dnat=False):
         return
 
     haproxy_content = generate_global()
+    haproxy_content += generate_resolvers()
     haproxy_content += generate_defaults()
 
     if not dnat:
-        http_port = 80
-        https_port = 443
+        http_port = config["http_port"]
+        https_port = config["https_port"]
     else:
         http_port = current_port
         https_port = current_port + 1
@@ -98,6 +99,12 @@ def generate_global():
     result += os.linesep
     return result
 
+def generate_resolvers():
+    result = fmt('resolvers res', indent=None)
+    result += fmt('nameserver ns1 1.1.1.1:53')
+    result += fmt('nameserver ns2 1.0.0.1:53')
+    result += os.linesep
+    return result
 
 def generate_defaults():
     result = fmt('defaults', indent=None)
@@ -114,6 +121,8 @@ def generate_defaults():
     result += fmt('timeout queue 120s')
     result += fmt('timeout check 10s')
     result += fmt('retries 3')
+    result += fmt('default-server init-addr none')
+    
     result += os.linesep
     return result
 

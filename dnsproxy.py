@@ -77,6 +77,15 @@ def read_config(args):
         config["base_ip"] = args.base_ip
     if args.base_port:
         config["base_port"] = args.base_port
+    if args.http_port:
+        config["http_port"] = args.http_port
+    if args.https_port:
+        config["https_port"] = args.https_port
+
+    if not config["http_port"]:
+        config["http_port"] = 80
+    if not config["https_port"]:
+        config["https_port"] = 443
 
     if not config["public_ip"]:
         try:
@@ -220,6 +229,8 @@ if __name__ == "__main__":
     parser.add_argument("--bind-ip", type=str, default=None, help="Specify the IP that haproxy should bind to")
     parser.add_argument("--base-ip", type=str, default=None, help="Specify the base IP from which DNAT should start generating.")
     parser.add_argument("--base-port", type=str, default=None, help="Specify the base port from which DNAT should start generating.")
+    parser.add_argument("--http-port", type=int, default=None, help="Specify the HTTP port for HAProxy. Only used when DNAT is disabled.")
+    parser.add_argument("--https-port", type=int, default=None, help="Specify the HTTPS port for HAProxy. Only used when DNAT is disabled.")
 
     parser.add_argument("--save", action="store_true", help="Specify wether to save the configuration to config.json")
     parser.add_argument("--output-dir", type=str, default="output", help="Specify the output directory")
