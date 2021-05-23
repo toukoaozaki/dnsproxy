@@ -604,6 +604,18 @@
         "domain":"api.crunchyroll.com",
         "protocols": ["http", "https"],
         "dnat": false
+      },
+      {
+        "alias":"crunchyroll-beta-api",
+        "domain":"beta-api.crunchyroll.com",
+        "protocols": ["http", "https"],
+        "dnat": false
+      },
+      {
+        "alias":"crunchyroll-geolocation",
+        "domain":"geolocation.onetrust.com",
+        "protocols": ["http", "https"],
+        "dnat": false
       }
     ]
   },
