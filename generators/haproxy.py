@@ -121,7 +121,7 @@ def generate_defaults():
     result += fmt('timeout queue 120s')
     result += fmt('timeout check 10s')
     result += fmt('retries 3')
-    result += fmt('default-server init-addr none')
+    result += fmt('default-server init-addr none check resolvers res')
     
     result += os.linesep
     return result
