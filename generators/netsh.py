@@ -1,5 +1,5 @@
 import os
-from util import long2ip, ip2long, port
+from .util import long2ip, ip2long, port
 
 
 def generate(config):
@@ -12,7 +12,7 @@ def generate(config):
     netsh_content += generate_netsh('443', public_ip, current_ip, current_port)
     current_port += 1
 
-    for group in config["groups"].values():
+    for group in list(config["groups"].values()):
         for proxy in group["proxies"]:
             if proxy["dnat"]:
                 current_ip = long2ip(ip2long(current_ip) + 1)

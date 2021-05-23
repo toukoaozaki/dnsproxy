@@ -1,5 +1,5 @@
 import os
-from util import long2ip, ip2long
+from .util import long2ip, ip2long
 
 
 def generate(config):
@@ -8,7 +8,7 @@ def generate(config):
     local_device = config["local_device"]
 
     iproute2_content = generate_iproute2(current_ip, local_subnet, local_device)
-    for group in config["groups"].values():
+    for group in list(config["groups"].values()):
         for proxy in group["proxies"]:
             if proxy["dnat"]:
                 current_ip = long2ip(ip2long(current_ip) + 1)

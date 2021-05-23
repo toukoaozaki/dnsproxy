@@ -3,7 +3,7 @@
 import os
 import sys
 import argparse
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import time
 import random
 import string
@@ -18,35 +18,35 @@ from generators.util import long2ip, ip2long
 def print_ips(config):
     current_ip = config["base_ip"]
 
-    print 'Make sure the following IP addresses are available as virtual interfaces on your iptables router:'
-    print current_ip
+    print('Make sure the following IP addresses are available as virtual interfaces on your iptables router:')
+    print(current_ip)
     current_iplong = ip2long(current_ip)
-    for group in config["groups"].values():
+    for group in list(config["groups"].values()):
         for proxy in group["proxies"]:
             if proxy["dnat"]:
                 current_iplong += 1
-                print long2ip(current_iplong)
+                print(long2ip(current_iplong))
 
 
 def print_firewall(config, dnat=False):
     bind_ip = config["public_ip"]
-    print 'If you are using an inbound firewall on ' + bind_ip + ':'
+    print('If you are using an inbound firewall on ' + bind_ip + ':')
     if not dnat:
         if config["stats"]["enabled"]:
-            print config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -d ' + bind_ip + ' --dport ' + str(config["stats"]["port"]) + ' -j ACCEPT'
+            print(config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -d ' + bind_ip + ' --dport ' + str(config["stats"]["port"]) + ' -j ACCEPT')
 
-        print config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -m multiport -d ' + bind_ip + ' --dports ' + "80" + ',' + "443" + ' -j ACCEPT'
+        print(config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -m multiport -d ' + bind_ip + ' --dports ' + "80" + ',' + "443" + ' -j ACCEPT')
     else:
         if config["stats"]["enabled"]:
-            print config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -d ' + bind_ip + ' --dport ' + str(config["stats"]["port"]) + ' -j ACCEPT'
+            print(config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -d ' + bind_ip + ' --dport ' + str(config["stats"]["port"]) + ' -j ACCEPT')
 
-        print config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -m multiport -d ' + bind_ip + ' --dports ' + str(config["base_port"]) + ':' + str(port_range(config)) + ' -j ACCEPT'
+        print(config["iptables_location"] + ' -A INPUT -p tcp -m state --state NEW -m multiport -d ' + bind_ip + ' --dports ' + str(config["base_port"]) + ':' + str(port_range(config)) + ' -j ACCEPT')
 
 
 def port_range(config):
     start = config["base_port"]
     end = start + 2
-    for group in config["groups"].values():
+    for group in list(config["groups"].values()):
         for proxy in group["proxies"]:
             if proxy["dnat"]:
                 end += len(proxy["protocols"])
@@ -55,17 +55,17 @@ def port_range(config):
 
 def read_config(args):
     if not os.path.isfile("config.json"):
-        print "config.json does not exist! Please copy config-sample.json to config.json and edit to your liking, then run the script."
+        print("config.json does not exist! Please copy config-sample.json to config.json and edit to your liking, then run the script.")
         sys.exit(1)
 
     countries = args.country
-    if isinstance(countries, basestring):
+    if isinstance(countries, str):
         countries = [countries]
     countries = [country.lower().strip() for country in countries]
 
     for country in countries:
         if not os.path.isfile("proxies/proxies-%s.json" % country):
-            print "The proxy configuration file proxies-%s.json does not exist! Exiting." % country
+            print("The proxy configuration file proxies-%s.json does not exist! Exiting." % country)
             sys.exit(1)
     content = util.get_contents("config.json")
     config = util.json_decode(content)
@@ -81,8 +81,8 @@ def read_config(args):
     if not config["public_ip"]:
         try:
             print("Autodetecting public IP address...")
-            public_ip = urllib2.urlopen("http://l2.io/ip").read().strip()
-            print("Detected public IP as %s. If it's wrong, please cancel the script now and set it in config.json or specify with --ip" % public_ip)
+            public_ip = urllib.request.urlopen("http://l2.io/ip").read().decode('ascii').strip()
+            print(("Detected public IP as %s. If it's wrong, please cancel the script now and set it in config.json or specify with --ip" % public_ip))
             time.sleep(1)
             config["public_ip"] = public_ip
         except:
@@ -100,9 +100,9 @@ def read_config(args):
         only = set(args.only)
         for item in args.only:
             if item not in groups:
-                print "Nonexistent Item: %s, exiting" % item
+                print("Nonexistent Item: %s, exiting" % item)
                 sys.exit()
-        for item in groups.keys():
+        for item in list(groups.keys()):
             if item not in only:
                 del groups[item]
     elif args.skip:
@@ -117,7 +117,7 @@ def read_config(args):
 def main(args):
     config = read_config(args)
 
-    print ""
+    print("")
 
     # Empty the output directory
     shutil.rmtree(args.output_dir, ignore_errors=True)
@@ -145,12 +145,12 @@ def main(args):
 
     # Set dnat specific options, make sure required configuration is present
     if dnat:
-        print "Please be aware that this is an advanced option. For most cases, pure-sni will be enough."
+        print("Please be aware that this is an advanced option. For most cases, pure-sni will be enough.")
         if not config["base_ip"]:
-            print "Missing base_ip! Update config.json and re-run the script."
+            print("Missing base_ip! Update config.json and re-run the script.")
             sys.exit(1)
         if not config["base_port"]:
-            print "Missing base_port! Update config.json and re-run the script."
+            print("Missing base_port! Update config.json and re-run the script.")
             sys.exit(1)
         dnat = True
         print_ips(config)
@@ -159,54 +159,54 @@ def main(args):
         if output == "haproxy":
             print_firewall(config, dnat=dnat)
             if config["stats"]["enabled"] and not config["stats"]["password"]:
-                print ""
-                print "Missing haproxy stats password! Autogenerating one..."
-                config["stats"]["password"] = ''.join(random.choice(string.ascii_letters + string.digits) for _ in xrange(10))
-                print("HAProxy stats password is %s, please make a note of it." % config["stats"]["password"])
-            print ""
+                print("")
+                print("Missing haproxy stats password! Autogenerating one...")
+                config["stats"]["password"] = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(10))
+                print(("HAProxy stats password is %s, please make a note of it." % config["stats"]["password"]))
+            print("")
             haproxy_content = generators.generate_haproxy(config, dnat=dnat)
             util.put_contents(args.haproxy_filename, haproxy_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.haproxy_filename
+            print('File generated: ' + args.haproxy_filename)
         elif output == "dnsmasq":
-            print ""
-            print '***********************************************************************************************'
-            print 'Caution: It\'s possible to run a (recursive) DNS forwarder on your remote server ' + config["public_ip"] + '.'
-            print 'If you leave the DNS port wide open to everyone, your server will most likely get terminated'
-            print 'sooner or later because of abuse (DDoS amplification attacks).'
-            print '***********************************************************************************************'
-            print ""
+            print("")
+            print('***********************************************************************************************')
+            print('Caution: It\'s possible to run a (recursive) DNS forwarder on your remote server ' + config["public_ip"] + '.')
+            print('If you leave the DNS port wide open to everyone, your server will most likely get terminated')
+            print('sooner or later because of abuse (DDoS amplification attacks).')
+            print('***********************************************************************************************')
+            print("")
 
             dnsmasq_content = generators.generate_dnsmasq(config, dnat=dnat)
             util.put_contents(args.dnsmasq_filename, dnsmasq_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.dnsmasq_filename
+            print('File generated: ' + args.dnsmasq_filename)
         elif output == "hosts":
             hosts_content = generators.generate_hosts(config, dnat=dnat)
             util.put_contents(args.hosts_filename, hosts_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.hosts_filename
+            print('File generated: ' + args.hosts_filename)
         elif not dnat:
-            print "Output %s cannot be generated" % output
+            print("Output %s cannot be generated" % output)
             continue
         elif output == "iptables":
             iptables_content = generators.generate_iptables(config)
             util.put_contents(args.iptables_filename, iptables_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.iptables_filename
+            print('File generated: ' + args.iptables_filename)
         elif output == "iproute2":
             if not config.get("local_subnet", False) or not config.get("local_device", False):
-                print 'Output iproute2 cannot be generated: Missing local_subnet and/or local_device in config.json'
+                print('Output iproute2 cannot be generated: Missing local_subnet and/or local_device in config.json')
             else:
                 iproute2_content = generators.generate_iproute2(config)
                 util.put_contents(args.iproute2_filename, iproute2_content, base_dir=args.output_dir)
-                print 'File generated: ' + args.iproute2_filename
+                print('File generated: ' + args.iproute2_filename)
         elif output == "netsh":
             netsh_content = generators.generate_netsh(config)
             util.put_contents(args.netsh_filename, netsh_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.netsh_filename
+            print('File generated: ' + args.netsh_filename)
         elif output == "rinetd":
             rinetd_content = generators.generate_rinetd(config)
             util.put_contents(args.rinetd_filename, rinetd_content, base_dir=args.output_dir)
-            print 'File generated: ' + args.rinetd_filename
+            print('File generated: ' + args.rinetd_filename)
         else:
-            print "Output %s cannot be generated" % output
+            print("Output %s cannot be generated" % output)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate configuration files to setup a tunlr style smart DNS")

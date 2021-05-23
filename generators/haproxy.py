@@ -1,4 +1,4 @@
-from util import fmt, port
+from .util import fmt, port
 import os
 
 
@@ -29,7 +29,7 @@ def generate(config, dnat=False):
     if config["stats"]["enabled"]:
         haproxy_content += generate_stats(config["stats"], bind_ip)
 
-    for group in config["groups"].values():
+    for group in list(config["groups"].values()):
         for proxy in group["proxies"]:
             if not dnat or (dnat and not proxy["dnat"]):
                 for protocol in proxy["protocols"]:
@@ -47,7 +47,7 @@ def generate(config, dnat=False):
 
     if dnat:
         current_port += 2
-        for group in config["groups"].values():
+        for group in list(config["groups"].values()):
             for proxy in group["proxies"]:
                 if proxy["dnat"]:
                     for protocol in proxy["protocols"]:
