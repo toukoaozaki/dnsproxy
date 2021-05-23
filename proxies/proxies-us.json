@@ -170,9 +170,43 @@
         "dnat": true
       },
       {
+        "alias":"netflix-htmltvui-api",
+        "domain":"htmltvui-api.netflix.com",
+        "protocols": ["http", "https"],
+        "dnat": true
+      },
+      {
         "alias":"bivl-netflix-com",
         "domain":"bivl.netflix.com",
         "protocols": ["https"],
+        "dnat": true
+      }
+    ]
+  },
+  "funimation": {
+    "proxies": [
+      {
+        "alias":"funimation-prod-api",
+        "domain":"prod-api-funimationnow.dadcdigital.com",
+        "protocols": ["http", "https"],
+        "dnat": true
+      },
+      {
+        "alias":"funimation-prod-akamaized",
+        "domain":"funiprod.akamaized.net",
+        "protocols": ["http", "https"],
+        "dnat": true
+      },
+      {
+        "alias":"funimation-cloudfront-d132",
+        "domain":"d132fumi6di1wa.cloudfront.net",
+        "protocols": ["http", "https"],
+        "dnat": true
+      },
+      {
+        "alias":"funimation-cloudfront-d2tp",
+        "domain":"d2tpjnnbi0bpkk.cloudfront.net",
+        "protocols": ["http", "https"],
         "dnat": true
       }
     ]
@@ -856,6 +890,18 @@
         "domain":"atv-ext.amazon.com",
         "protocols": ["http", "https"],
         "dnat": false
+      },
+      {
+        "alias":"amazon_api",
+        "domain":"api.amazon.com",
+        "protocols": ["http", "https"],
+        "dnat": true
+      },
+      {
+        "alias":"amazon_na_api",
+        "domain":"na.api.amazonvideo.com",
+        "protocols": ["http", "https"],
+        "dnat": true
       }
     ]
   }
